@@ -3,42 +3,15 @@ import { getValue } from './path'
 import { isNil, warn, isObject, bind } from './util'
 import format from './format'
 
-function parseArgs (...args) {
-  let lang = null
-  let fallback = null
-  if (args.length === 1) {
-    if (isObject(args[0]) || Array.isArray(args[0])) {
-      args = args[0]
-    } else if (typeof args[0] === 'string') {
-      lang = args[0]
-    }
-  } else if (args.length === 2) {
-    if (typeof args[0] === 'string') {
-      lang = args[0]
-    }
-    if (isObject(args[1]) || Array.isArray(args[1])) {
-      args = args[1]
-    }
-  }
-
-  return { lang, fallback, params: args }
-}
-
-function getComponentLocale (lang) {
-  return this.$options.locales[lang]
-}
-
-function getGlobalLocale (lang) {
-  return this.locales[lang]
-}
-
 export default class VueI18n {
-  constructor (options) {
+  constructor (options = {}) {
     console.log('VueI18n.constructor', options)
     this.vm = null
     const lang = this._lang = options.lang || 'en'
     const locales = this._locales = options.locales || {}
-    this.missingHandler = options.missingHandler || null
+    this._defaultFormatter = format
+    this._customFormatter = options.formatter
+    this._missingHandler = options.missingHandler
     this.resetVM({ lang, locales })
   }
 
@@ -81,8 +54,8 @@ export default class VueI18n {
 
   warnDefault (lang, key, vm, result) {
     if (!isNil(result)) { return result }
-    if (this.missingHandler) {
-      this.missingHandler.apply(null, [lang, key, vm])
+    if (this._missingHandler) {
+      this._missingHandler.apply(null, [lang, key, vm])
     } else {
       if (process.env.NODE_ENV !== 'production') {
         warn('Cannot translate the value of keypath "' + key + '". '
@@ -123,7 +96,11 @@ export default class VueI18n {
 
   format (val, ...args) {
     console.log('VueI18n#format', val, ...args)
-    return format(val, ...args)
+    if (this._customFormatter) {
+      return this._customFormatter(val, ...args)
+    } else {
+      return this._defaultFormatter(val, ...args)
+    }
   }
 
   t (key, lang, locales, fallback, args) {
