@@ -1,7 +1,7 @@
 <template>
   <div>
     <p>{{ msg }}</p>
-    <p>$t: {{ $t('message.foo', ['bar']) }}</p>
+    <p>$t: {{ $t('message.foo', { name: 'bar' }) }}</p>
   </div>
 </template>
 

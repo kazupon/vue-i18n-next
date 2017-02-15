@@ -1,16 +1,15 @@
 import { install, Vue } from './install'
 import { getValue } from './path'
 import { isNil, warn, isObject, bind } from './util'
-import format from './format'
+import Formatter from './formatter'
 
 export default class VueI18n {
   constructor (options = {}) {
     console.log('VueI18n.constructor', options)
     this.vm = null
-    const lang = this._lang = options.lang || 'en'
+    const lang = this._lang = options.lang || 'en-US'
     const locales = this._locales = options.locales || {}
-    this._defaultFormatter = format
-    this._customFormatter = options.formatter
+    this._formatter = options.formatter || new Formatter(lang)
     this._missingHandler = options.missingHandler
     this.resetVM({ lang, locales })
   }
@@ -96,11 +95,7 @@ export default class VueI18n {
 
   format (val, ...args) {
     console.log('VueI18n#format', val, ...args)
-    if (this._customFormatter) {
-      return this._customFormatter(val, ...args)
-    } else {
-      return this._defaultFormatter(val, ...args)
-    }
+    return this._formatter.format(val, ...args)
   }
 
   t (key, lang, locales, fallback, args) {

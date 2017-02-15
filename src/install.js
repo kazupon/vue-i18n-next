@@ -35,10 +35,8 @@ export function install (_Vue) {
         const $lang = this.$i18n.lang
         const $locales = this.$i18n.locales
         return (key, ...args) => {
-          console.log('counter with $t', key, ...args, $locales)
           if (!key) { return '' }
           let { lang, fallback, params } = parseArgs(...args)
-          console.log('parsed', lang, fallback, params)
           if (!lang) {
             lang = $lang
           }
